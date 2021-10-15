@@ -2,8 +2,8 @@
 ------------------------------------------
 		ADVANCED NETWORK DEVICES
 			MAIN CLOCK SCRIPT
-		   SCRIPT VERSION 1.8
-		WRITTEN BY YELLOWBOY111
+		   SCRIPT VERSION 1.8.5
+		  WRITTEN BY YELLOWBOY111
 __________________________________________
 ]]
 
@@ -11,12 +11,12 @@ gui = script.Parent.SurfaceGui
 clock = script.Parent.Parent
 currentFrame = 'SMALL_CLOCK'
 MAC_ADDRESS_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'}
-
+settngs = require(script.Parent.Settings)
 --INITIALIZE
 function initialize()
 	--Generate Random MAC Address
-	local mac = ""
-	for i = 1, 12 do
+	local mac = settngs.STARTINGMACADDR
+	for i = 1, 6 do
 		mac = mac .. MAC_ADDRESS_CHARS[math.random(1, #MAC_ADDRESS_CHARS)]
 	end
 	gui.MAC_ADDR.MAC_ADDR.Text = mac
@@ -41,8 +41,14 @@ function initialize()
 	wait(2)
 	changeScreen("MAC_ADDR")
 	wait(2)
+	gui.FIRMWARE.CLOCK_ID.Text = settngs.FIRMWARE_VER
 	changeScreen("FIRMWARE")
 	wait(2)
+	gui.SMALL_CLOCK.HourMinute.TextColor3 = settngs.HMCOLOR
+	gui.SMALL_CLOCK.Seconds.TextColor3 = settngs.SECCOLOR
+	gui.SMALL_CLOCK.Date.TextColor3 = settngs.DATECOLOR
+	gui.LARGE_CLOCK.HourMinute.TextColor3 = settngs.HMCOLOR
+	gui.LARGE_CLOCK.Seconds.TextColor3 = settngs.SECCOLOR
 	changeScreen("SMALL_CLOCK")
 end
 --Screen Changer
@@ -119,6 +125,16 @@ function onCommandReceived(player, clockID, command, param)
 			end
 		elseif string.match(string.lower(command), 'message') or string.match(string.lower(command), 'msg') then
 			showMessage(player, param)
+		elseif string.match(string.lower(command), 'setclockname') then
+			if param == nil or param == "" then
+				game.ReplicatedStorage.FireCommand:FireClient(player, "Message from Clock #" .. clock.ClockID.Value .. ": [ERROR] Name specified is empty. Please enter a string. (Example Usage: setclockname 'John Does IP Clock')")
+			else
+				settngs:ChangeClockName(param)
+				game.ReplicatedStorage.FireCommand:FireClient(player, "Message from Clock #" .. clock.ClockID.Value .. ": [OK] Set name of clock to " .. param)
+				
+			end
+		elseif string.match(string.lower(command), 'getclockname') then
+			game.ReplicatedStorage.FireCommand:FireClient(player, "Message from Clock #" .. clock.ClockID.Value .. ': [OK] Clock name is set to ' .. settngs.CLOCKNAME)
 		elseif string.match(string.lower(command), "help") then
 				local help_list = {
 					[1] = "ADVANCED NETWORK DEVICES",
