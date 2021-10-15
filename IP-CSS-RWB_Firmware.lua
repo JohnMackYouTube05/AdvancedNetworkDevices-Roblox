@@ -2,8 +2,8 @@
 ------------------------------------------
 		ADVANCED NETWORK DEVICES
 			MAIN CLOCK SCRIPT
-		   SCRIPT VERSION 1.8
-		WRITTEN BY YELLOWBOY111
+		   SCRIPT VERSION 1.8.5
+		  WRITTEN BY YELLOWBOY111
 __________________________________________
 ]]
 
@@ -11,22 +11,22 @@ gui = script.Parent.SurfaceGui
 clock = script.Parent.Parent
 currentFrame = 'LARGE_CLOCK'
 MAC_ADDRESS_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'}
-
+settngs = require(script.Parent.Settings)
 --INITIALIZE
 function initialize()
 	--Generate Random MAC Address
-	local mac = ""
-	for i = 1, 12 do
+	local mac = settngs.STARTINGMACADDR
+	for i = 1, 6 do
 		mac = mac .. MAC_ADDRESS_CHARS[math.random(1, #MAC_ADDRESS_CHARS)]
 	end
 	gui.MAC_ADDR.MAC_ADDR.Text = mac
 	gui.IP_ADDR.CLOCK_ID.Text = tostring(clock.ClockID.Value)
-	changeScreen("ANET_DEVICE_LOGO")
+	changeScreen("ANET_DEVICE_LOGO") --Splash Screen
 	wait(4)
-	for _, i in pairs(workspace:GetDescendants()) do
+	for _, i in pairs(workspace:GetDescendants()) do --Check if there are clock ID conflicts.
 		if i.Name == "ClockID" and i:IsA("IntValue") then
-			if i.Parent ~= clock then
-				if i.Value == clock.ClockID.Value then
+			if i.Parent ~= clock then --Make sure the clock does not mark itself as an ID conflict.
+				if i.Value == clock.ClockID.Value then 
 					clock.ClockID.Value += 1
 					break
 				end
@@ -41,9 +41,15 @@ function initialize()
 	wait(2)
 	changeScreen("MAC_ADDR")
 	wait(2)
+	gui.FIRMWARE.CLOCK_ID.Text = settngs.FIRMWARE_VER
 	changeScreen("FIRMWARE")
 	wait(2)
-	changeScreen("LARGE_CLOCK")
+	gui.SMALL_CLOCK.HourMinute.TextColor3 = settngs.HMCOLOR
+	gui.SMALL_CLOCK.Seconds.TextColor3 = settngs.SECCOLOR
+	gui.SMALL_CLOCK.Date.TextColor3 = settngs.DATECOLOR
+	gui.LARGE_CLOCK.HourMinute.TextColor3 = settngs.HMCOLOR
+	gui.LARGE_CLOCK.Seconds.TextColor3 = settngs.SECCOLOR
+	changeScreen("SMALL_CLOCK")
 end
 --Screen Changer
 function changeScreen(frameName)
@@ -119,6 +125,16 @@ function onCommandReceived(player, clockID, command, param)
 			end
 		elseif string.match(string.lower(command), 'message') or string.match(string.lower(command), 'msg') then
 			showMessage(player, param)
+		elseif string.match(string.lower(command), 'setclockname') then
+			if param == nil or param == "" then
+				game.ReplicatedStorage.FireCommand:FireClient(player, "Message from Clock #" .. clock.ClockID.Value .. ": [ERROR] Name specified is empty. Please enter a string. (Example Usage: setclockname 'John Does IP Clock')")
+			else
+				settngs:ChangeClockName(param)
+				game.ReplicatedStorage.FireCommand:FireClient(player, "Message from Clock #" .. clock.ClockID.Value .. ": [OK] Set name of clock to " .. param)
+
+			end
+		elseif string.match(string.lower(command), 'getclockname') then
+			game.ReplicatedStorage.FireCommand:FireClient(player, "Message from Clock #" .. clock.ClockID.Value .. ': [OK] Clock name is set to ' .. settngs.CLOCKNAME)
 		elseif string.match(string.lower(command), "help") then
 			local help_list = {
 				[1] = "ADVANCED NETWORK DEVICES",
@@ -200,6 +216,7 @@ function onCommandReceived(player, clockID, command, param)
 				end
 
 			end
+
 		else
 			game.ReplicatedStorage.FireCommand:FireClient(player, "Invalid command. Type help to list all commands.")
 		end
