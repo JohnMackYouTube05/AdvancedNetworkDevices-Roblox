@@ -2,7 +2,7 @@
 ------------------------------------------
 		ADVANCED NETWORK DEVICES
 			MAIN CLOCK SCRIPT
-		   SCRIPT VERSION 1.8.5
+		   SCRIPT VERSION 1.9.0
 		  WRITTEN BY YELLOWBOY111
 __________________________________________
 ]]
@@ -93,8 +93,13 @@ function onCommandReceived(player, clockID, command, param)
 		elseif string.match(string.lower(command), 'alarm') then
 
 			if string.lower(param) == 'lockdown' then
-				gui.ALARMS.TORNADO.Visible = false
+				gui.ALARMS.FIRE.Visible = false
 				gui.ALARMS.LOCKDOWN.Visible = true
+				gui.ALARMS.EVAC.Visible = false
+				gui.ALARMS.HOLD.Visible = false
+				gui.ALARMS.TEST.Visible = false
+				gui.ALARMS.TORNADO.Visible = false
+				gui.ALARMS.LOCKDOWN.Cycle.Disabled = false
 				changeScreen("ALARMS")
 				clock.Screen.BlinkBlueLight.Disabled = false
 				game.ReplicatedStorage.FireCommand:FireClient(player, 'Message from Clock #' .. clock.ClockID.Value .. ': [OK] Set lockdown message, turned blue LED on.')
@@ -103,21 +108,83 @@ function onCommandReceived(player, clockID, command, param)
 					wait(clock.Speaker.LockdownAnnouncement.TimeLength)
 				end
 			elseif string.lower(param) == 'tornado' then
-				gui.ALARMS.TORNADO.Visible = true
+				gui.ALARMS.FIRE.Visible = false
 				gui.ALARMS.LOCKDOWN.Visible = false
+				gui.ALARMS.EVAC.Visible = false
+				gui.ALARMS.HOLD.Visible = false
+				gui.ALARMS.TEST.Visible = false
+				gui.ALARMS.TORNADO.Visible = true
+				gui.ALARMS.LOCKDOWN.Cycle.Disabled = true
+				gui.ALARMS.TORNADO.Cycle.Disabled = false
 				changeScreen("ALARMS")
 				clock.RedLight.Material = Enum.Material.Neon
 				clock.RedLight.SpotLight.Enabled = true
 				clock.Speaker.TornadoWarning:Play()
+			elseif string.lower(param) == 'fire' then
+				gui.ALARMS.FIRE.Visible = true
+				gui.ALARMS.LOCKDOWN.Visible = false
+				gui.ALARMS.EVAC.Visible = false
+				gui.ALARMS.HOLD.Visible = false
+				gui.ALARMS.TEST.Visible = false
+				gui.ALARMS.TORNADO.Visible = false
+				changeScreen("ALARMS")
+				clock.WhiteLight.SlowBlink.Disabled = false
+				clock.Speaker.FireAlarm:Play()
+			elseif string.lower(param) == 'evac' or string.lower(param) == 'evacuate' then
+				gui.ALARMS.FIRE.Visible = false
+				gui.ALARMS.LOCKDOWN.Visible = false
+				gui.ALARMS.EVAC.Visible = true
+				gui.ALARMS.HOLD.Visible = false
+				gui.ALARMS.TEST.Visible = false
+				gui.ALARMS.TORNADO.Visible = false
+				changeScreen("ALARMS")
+				clock.WhiteLight.SlowBlink.Disabled = false
+				clock.Speaker.EvacuationMessage:Play()
+			elseif string.lower(param) == 'hold' then
+				gui.ALARMS.FIRE.Visible = false
+				gui.ALARMS.LOCKDOWN.Visible = false
+				gui.ALARMS.EVAC.Visible = false
+				gui.ALARMS.HOLD.Visible = true
+				gui.ALARMS.TEST.Visible = false
+				gui.ALARMS.TORNADO.Visible = false
+				changeScreen("ALARMS")
+				clock.WhiteLight.SlowBlink.Disabled = false
+				clock.BlueLight.SpotLight.Enabled = true
+				clock.BlueLight.Material = Enum.Material.Neon
+			elseif string.lower(param) == 'test' then
+				gui.ALARMS.FIRE.Visible = false
+				gui.ALARMS.LOCKDOWN.Visible = false
+				gui.ALARMS.EVAC.Visible = false
+				gui.ALARMS.HOLD.Visible = false
+				gui.ALARMS.TEST.Visible = true
+				gui.ALARMS.TORNADO.Visible = false
+				changeScreen("ALARMS")
+				clock.RedLight.SlowBlink.Disabled = false
+				clock.WhiteLight.SlowBlink.Disabled = false
+				clock.Screen.BlinkBlueLight.Disabled = false
 			elseif string.lower(param) == 'clear' then
+				clock.RedLight.SlowBlink.Disabled = true
+				clock.WhiteLight.SlowBlink.Disabled = true
+				clock.Screen.BlinkBlueLight.Disabled = true
 				clock.RedLight.Material = Enum.Material.SmoothPlastic
 				clock.WhiteLight.Material = Enum.Material.SmoothPlastic
 				clock.BlueLight.Material = Enum.Material.SmoothPlastic
 				clock.RedLight.SpotLight.Enabled = false
 				clock.WhiteLight.SpotLight.Enabled = false
 				clock.BlueLight.SpotLight.Enabled = false
-				clock.Screen.BlinkBlueLight.Disabled = true
+
+				gui.ALARMS.FIRE.Visible = false
+				gui.ALARMS.LOCKDOWN.Visible = false
+				gui.ALARMS.EVAC.Visible = false
+				gui.ALARMS.HOLD.Visible = false
+				gui.ALARMS.TEST.Visible = false
+				gui.ALARMS.TORNADO.Visible = false
+				gui.ALARMS.TORNADO.Cycle.Disabled = true
+				gui.ALARMS.LOCKDOWN.Cycle.Disabled = true
+
 				game.ReplicatedStorage.FireCommand:FireClient(player, 'Message from Clock #' .. clock.ClockID.Value .. ': [OK] Cleared LEDs, switching to all clear message.')
+				clock.Speaker.FireAlarm:Stop()
+				clock.Speaker.EvacuationMessage:Stop()
 				clock.Speaker.AllClear:Play()
 				showMessage(player, '<i>All clear. Please resume normal activities.</i>')
 				clock.Speaker.AllClear:Play()
